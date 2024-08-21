@@ -5,6 +5,7 @@ import { ChunkedArray, DummyValue, GenerateSql } from 'src/decorators';
 import { AssetFaceEntity } from 'src/entities/asset-face.entity';
 import { AssetJobStatusEntity } from 'src/entities/asset-job-status.entity';
 import { AssetEntity } from 'src/entities/asset.entity';
+import { FaceSearchEntity } from 'src/entities/face-search.entity';
 import { PersonEntity } from 'src/entities/person.entity';
 import {
   AssetFaceId,
@@ -29,6 +30,7 @@ export class PersonRepository implements IPersonRepository {
     @InjectRepository(AssetEntity) private assetRepository: Repository<AssetEntity>,
     @InjectRepository(PersonEntity) private personRepository: Repository<PersonEntity>,
     @InjectRepository(AssetFaceEntity) private assetFaceRepository: Repository<AssetFaceEntity>,
+    @InjectRepository(FaceSearchEntity) private faceSearchRepository: Repository<FaceSearchEntity>,
     @InjectRepository(AssetJobStatusEntity) private jobStatusRepository: Repository<AssetJobStatusEntity>,
   ) {}
 
@@ -284,12 +286,26 @@ export class PersonRepository implements IPersonRepository {
     return res.map((row) => row.id);
   }
 
-  async replaceFaces(assetId: string, entities: AssetFaceEntity[], sourceType: string): Promise<string[]> {
-    return this.dataSource.transaction(async (manager) => {
-      await manager.delete(AssetFaceEntity, { assetId, sourceType });
-      const assetFaces = await manager.save(AssetFaceEntity, entities);
-      return assetFaces.map(({ id }) => id);
-    });
+  async refreshFaces(facesToAdd: Partial<AssetFaceEntity>[], faceIdsToRemove: string[]): Promise<void> {
+    const deletedCte = this.assetFaceRepository
+      .createQueryBuilder()
+      .delete()
+      .where('id = ANY(:faceIdsToRemove)', { faceIdsToRemove });
+
+    if (facesToAdd.length === 0) {
+      await deletedCte.execute();
+      return;
+    }
+
+    const addedCte = this.assetFaceRepository.createQueryBuilder().insert().values(facesToAdd);
+
+    await this.faceSearchRepository
+      .createQueryBuilder()
+      .addCommonTableExpression(deletedCte, 'deleted')
+      .addCommonTableExpression(addedCte, 'added')
+      .insert()
+      .values(facesToAdd.map((face) => face.faceSearch!))
+      .execute();
   }
 
   async update(entities: Partial<PersonEntity>[]): Promise<PersonEntity[]> {

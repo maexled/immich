@@ -123,7 +123,6 @@ export class AssetRepository implements IAssetRepository {
       relations: {
         exifInfo: true,
         smartInfo: true,
-        tags: true,
         faces: {
           person: true,
         },

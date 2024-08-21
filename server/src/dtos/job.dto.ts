@@ -17,7 +17,7 @@ export class JobCommandDto {
   command!: JobCommand;
 
   @ValidateBoolean({ optional: true })
-  force!: boolean;
+  force?: boolean;
 }
 
 export class JobCountsDto {

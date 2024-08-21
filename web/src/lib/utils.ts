@@ -20,7 +20,7 @@ import {
   type PersonResponseDto,
   type SharedLinkResponseDto,
 } from '@immich/sdk';
-import { mdiCogRefreshOutline, mdiDatabaseRefreshOutline, mdiImageRefreshOutline } from '@mdi/js';
+import { mdiCogRefreshOutline, mdiDatabaseRefreshOutline, mdiHeadSyncOutline, mdiImageRefreshOutline } from '@mdi/js';
 import { sortBy } from 'lodash-es';
 import { init, register, t } from 'svelte-i18n';
 import { derived, get } from 'svelte/store';
@@ -212,6 +212,7 @@ export const getPeopleThumbnailUrl = (person: PersonResponseDto, updatedAt?: str
 export const getAssetJobName = derived(t, ($t) => {
   return (job: AssetJobName) => {
     const names: Record<AssetJobName, string> = {
+      [AssetJobName.RefreshFaces]: $t('refresh_faces'),
       [AssetJobName.RefreshMetadata]: $t('refresh_metadata'),
       [AssetJobName.RegenerateThumbnail]: $t('refresh_thumbnails'),
       [AssetJobName.TranscodeVideo]: $t('refresh_encoded_videos'),
@@ -224,6 +225,7 @@ export const getAssetJobName = derived(t, ($t) => {
 export const getAssetJobMessage = derived(t, ($t) => {
   return (job: AssetJobName) => {
     const messages: Record<AssetJobName, string> = {
+      [AssetJobName.RefreshFaces]: $t('refreshing_faces'),
       [AssetJobName.RefreshMetadata]: $t('refreshing_metadata'),
       [AssetJobName.RegenerateThumbnail]: $t('regenerating_thumbnails'),
       [AssetJobName.TranscodeVideo]: $t('refreshing_encoded_video'),
@@ -235,6 +237,7 @@ export const getAssetJobMessage = derived(t, ($t) => {
 
 export const getAssetJobIcon = (job: AssetJobName) => {
   const names: Record<AssetJobName, string> = {
+    [AssetJobName.RefreshFaces]: mdiHeadSyncOutline,
     [AssetJobName.RefreshMetadata]: mdiDatabaseRefreshOutline,
     [AssetJobName.RegenerateThumbnail]: mdiImageRefreshOutline,
     [AssetJobName.TranscodeVideo]: mdiCogRefreshOutline,
