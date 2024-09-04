@@ -197,8 +197,8 @@
             <a
               class="w-[90px]"
               href="{AppRoute.PEOPLE}/{person.id}?{QueryParameter.PREVIOUS_ROUTE}={currentAlbum?.id
-                ? `${AppRoute.ALBUMS}/${currentAlbum?.id}`
-                : AppRoute.PHOTOS}"
+                ? `${btoa(`${AppRoute.ALBUMS}/${currentAlbum?.id}`)}`
+                : btoa(AppRoute.PHOTOS)}"
               on:focus={() => ($boundingBoxesArray = people[index].faces)}
               on:blur={() => ($boundingBoxesArray = [])}
               on:mouseover={() => ($boundingBoxesArray = people[index].faces)}
